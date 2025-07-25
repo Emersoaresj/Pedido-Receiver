@@ -13,7 +13,7 @@ spring:
         spring.json.trusted.packages: '*'
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
     admin:
       client-id: kafka-admin-client
       auto-create-topics: true # Permite a criação automática do tópico se não existir
@@ -33,7 +33,7 @@ server:
 
 produto:
   service:
-    url: ${PRODUTO_SERVICE_URL:http://produto-service:8082}
+    url: ${PRODUTO_SERVICE_URL:http://localhost:8082}
 cliente:
   service:
-    url: ${CLIENTE_SERVICE_URL:http://cliente-service:8081}
+    url: ${CLIENTE_SERVICE_URL:http://localhost:8081}

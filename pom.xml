@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.fiap.postech</groupId>
-	<artifactId>pedido_service</artifactId>
+	<artifactId>pedido_receiver</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>pedido_service</name>
+	<name>pedido_receiver</name>
 	<description>Microsserviço responsável pelo cadastro, consulta e gerenciamento de pedidos no sistema PedidoHub.</description>
 	<url/>
 	<licenses>
