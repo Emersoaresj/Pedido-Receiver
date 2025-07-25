@@ -8,6 +8,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 @Mapper
 public interface PedidoMapper {
 
@@ -24,5 +26,8 @@ public interface PedidoMapper {
 
     @Mapping(target = "itens", ignore = true)
     Pedido entityToDomain (PedidoEntity pedidoEntity);
+
+    @Mapping(target = "itens", ignore = true)
+    List<Pedido> entitysToDomain (List<PedidoEntity> pedidoEntity);
 }
 

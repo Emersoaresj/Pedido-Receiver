@@ -1,9 +1,11 @@
 package com.fiap.postech.pedido_service.gateway.database;
 
+import com.fiap.postech.pedido_service.api.dto.PedidoDto;
 import com.fiap.postech.pedido_service.domain.Pedido;
 import com.fiap.postech.pedido_service.domain.PedidoItem;
 import com.fiap.postech.pedido_service.api.dto.ResponseDto;
 import com.fiap.postech.pedido_service.domain.exceptions.ErroInternoException;
+import com.fiap.postech.pedido_service.domain.exceptions.PedidoNotFoundException;
 import com.fiap.postech.pedido_service.gateway.database.entity.PedidoEntity;
 import com.fiap.postech.pedido_service.gateway.database.entity.PedidoItemEntity;
 import com.fiap.postech.pedido_service.gateway.database.repository.PedidoItemRepositoryJPA;
@@ -11,11 +13,14 @@ import com.fiap.postech.pedido_service.gateway.database.repository.PedidoReposit
 import com.fiap.postech.pedido_service.gateway.port.PedidoRepositoryPort;
 import com.fiap.postech.pedido_service.api.mapper.PedidoMapper;
 import com.fiap.postech.pedido_service.utils.ConstantUtils;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -29,6 +34,7 @@ public class PedidoRepositoryImpl implements PedidoRepositoryPort {
     @Autowired
     private PedidoItemRepositoryJPA pedidoItemRepositoryJPA;
 
+    @Transactional
     @Override
     public ResponseDto cadastrarPedido(Pedido pedido) {
         try {
@@ -55,6 +61,7 @@ public class PedidoRepositoryImpl implements PedidoRepositoryPort {
         return PedidoMapper.INSTANCE.entityToDomain(pedidoEntity);
     }
 
+    @Transactional
     @Override
     public ResponseDto atualizarPedido(Pedido pedido) {
         try {
@@ -66,6 +73,35 @@ public class PedidoRepositoryImpl implements PedidoRepositoryPort {
             log.error("Erro ao atualizar pedido", e);
             throw new ErroInternoException("Erro ao atualizar pedido: " + e.getMessage());
         }
+    }
+
+    @Override
+    public List<Pedido> buscarPedidoPorIdCliente(Integer idCliente) {
+        List<PedidoEntity> pedidoEntity = Collections.singletonList(pedidoRepositoryJPA.findByIdCliente(idCliente)
+                .orElseThrow(() -> new PedidoNotFoundException("Pedido não encontrado para o cliente do ID: " + idCliente)));
+        return PedidoMapper.INSTANCE.entitysToDomain(pedidoEntity);
+    }
+
+    @Override
+    public List<Pedido> listarTodos() {
+        try {
+            List<PedidoEntity> entities = pedidoRepositoryJPA.findAll();
+            return entities.stream()
+                    .map(PedidoMapper.INSTANCE::entityToDomain)
+                    .toList();
+        } catch (Exception e) {
+            log.error("Erro ao buscar pedidos", e);
+            throw new ErroInternoException("Erro ao buscar pedidos no banco de dados: " + e.getMessage());
+        }
+
+    }
+
+    @Transactional
+    @Override
+    public void deletarPedido(Integer idPedido) {
+        pedidoRepositoryJPA.findById(idPedido)
+                .orElseThrow(() -> new PedidoNotFoundException(ConstantUtils.PEDIDO_NAO_ENCONTRADO));
+        pedidoRepositoryJPA.deleteById(idPedido);
     }
 
 

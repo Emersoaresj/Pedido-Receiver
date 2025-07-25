@@ -7,4 +7,5 @@ public class PedidoClienteDto {
 
     private Integer idCliente;
     private String cpfCliente;
+    private String nomeCliente;
 }

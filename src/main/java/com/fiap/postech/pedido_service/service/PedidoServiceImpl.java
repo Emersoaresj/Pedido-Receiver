@@ -18,6 +18,7 @@ import com.fiap.postech.pedido_service.gateway.port.PedidoItemRepositoryPort;
 import com.fiap.postech.pedido_service.gateway.port.PedidoRepositoryPort;
 import com.fiap.postech.pedido_service.gateway.port.PedidoServicePort;
 import com.fiap.postech.pedido_service.utils.ConstantUtils;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +53,8 @@ public class PedidoServiceImpl implements PedidoServicePort {
     @Override
     public ResponseDto cadastrarPedido(PedidoRequest request) {
 
-        Integer idCliente = buscarIdCliente(request.getCpfCliente());
+        PedidoClienteDto clienteDto = buscarInfosCliente(request.getCpfCliente());
+        Integer idCliente = clienteDto.getIdCliente();
 
         List<PedidoItem> itens = montarItensPedido(request.getItens());
 
@@ -79,7 +82,7 @@ public class PedidoServiceImpl implements PedidoServicePort {
             }
 
             // Busca todos os itens existentes desse pedido
-            List<PedidoItem> itensExistentes = buscarItensPedido(id);
+            List<PedidoItem> itensExistentes = buscarItensPedidoByIdPedido(id);
 
             boolean allItemsUpdated = true;
 
@@ -109,13 +112,12 @@ public class PedidoServiceImpl implements PedidoServicePort {
             }
 
             // Busca todos os itens atualizados para calcular o novo valor total
-            List<PedidoItem> itensAtualizados = buscarItensPedido(id);
+            List<PedidoItem> itensAtualizados = buscarItensPedidoByIdPedido(id);
             BigDecimal valorTotalAtualizado = calcularValorTotal(itensAtualizados);
             pedidoExistente.setValorTotalPedido(valorTotalAtualizado);
 
             // Atualiza o pedido no banco
-            ResponseDto response = repositoryPort.atualizarPedido(pedidoExistente);
-            return response;
+            return repositoryPort.atualizarPedido(pedidoExistente);
 
         } catch (PedidoNotFoundException e) {
             log.error("Pedido não encontrado para o ID: {}", id);
@@ -141,7 +143,93 @@ public class PedidoServiceImpl implements PedidoServicePort {
 
     }
 
-    private List<PedidoItem> buscarItensPedido(Integer id) {
+    @Override
+    public List<PedidoDto> buscarPorCpfCliente(String cpfCliente) {
+        try {
+            // 1. Busca as informações do cliente (via Feign)
+            PedidoClienteDto clienteDto = buscarInfosCliente(cpfCliente);
+
+            // 2. Busca todos os pedidos do cliente (atenção: retorna uma lista!)
+            List<Pedido> pedidos = repositoryPort.buscarPedidoPorIdCliente(clienteDto.getIdCliente());
+
+            // 3. Para cada pedido, busca os itens, monta o PedidoDto e adiciona na lista de retorno
+            List<PedidoDto> resultado = new ArrayList<>();
+            for (Pedido pedido : pedidos) {
+                List<PedidoItem> itens = buscarItensPedidoByIdPedido(pedido.getIdPedido());
+                pedido.setItens(itens);
+
+                PedidoDto dto = new PedidoDto(
+                        pedido.getIdPedido(),
+                        clienteDto.getIdCliente(),
+                        pedido.getStatusPedido(),
+                        pedido.getDataPedido(),
+                        pedido.getValorTotalPedido(),
+                        itens
+                );
+                resultado.add(dto);
+            }
+
+            return resultado;
+
+        } catch (PedidoNotFoundException | FeignException.NotFound e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Erro inesperado ao buscar pedidos por CPF do cliente", e);
+            throw new ErroInternoException("Erro interno ao tentar buscar pedidos: " + e.getMessage());
+        }
+    }
+
+
+    @Override
+    public List<PedidoDto> listarTodos() {
+        try {
+            // 1. Busca todos os pedidos
+            List<Pedido> pedidos = repositoryPort.listarTodos();
+
+            // 2. Para cada pedido, busca os itens, monta o PedidoDto
+            List<PedidoDto> resultado = new ArrayList<>();
+            for (Pedido pedido : pedidos) {
+                // Busca os itens do pedido
+                List<PedidoItem> itens = buscarItensPedidoByIdPedido(pedido.getIdPedido());
+                pedido.setItens(itens);
+
+                PedidoDto dto = new PedidoDto(
+                        pedido.getIdPedido(),
+                        pedido.getIdCliente(),
+                        pedido.getStatusPedido(),
+                        pedido.getDataPedido(),
+                        pedido.getValorTotalPedido(),
+                        itens
+                );
+                resultado.add(dto);
+            }
+
+            return resultado;
+
+        } catch (ErroInternoException e) {
+            log.error("Erro inesperado ao buscar pedidos", e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Erro inesperado ao listar pedidos", e);
+            throw new ErroInternoException("Erro interno ao tentar listar pedidos: " + e.getMessage());
+        }
+    }
+
+
+    @Override
+    public void deletarPedido(Integer idPedido) {
+        try {
+            repositoryPort.deletarPedido(idPedido);
+        } catch (PedidoNotFoundException e) {
+            log.error("Pedido não encontrado para o ID: {}", idPedido, e);
+            throw e;
+        } catch (Exception e) {
+            log.error("Erro inesperado ao buscar pedido por ID: {}", idPedido, e);
+            throw new ErroInternoException("Erro interno ao tentar buscar pedido: " + e.getMessage());
+        }
+    }
+
+    private List<PedidoItem> buscarItensPedidoByIdPedido(Integer id) {
         try {
             List<PedidoItem> itens = pedidoItemRepositoryPort.buscarItensPedido(id);
             if (itens == null || itens.isEmpty()) {
@@ -157,10 +245,9 @@ public class PedidoServiceImpl implements PedidoServicePort {
         }
     }
 
-    private Integer buscarIdCliente(String cpfCliente) {
+    private PedidoClienteDto buscarInfosCliente(String cpfCliente) {
         try {
-            PedidoClienteDto pedidoClienteDto = pedidoClienteClient.buscarPorCpf(cpfCliente);
-            return pedidoClienteDto.getIdCliente();
+            return pedidoClienteClient.buscarPorCpf(cpfCliente);
         } catch (feign.FeignException.NotFound e) {
             log.warn("Cliente não encontrado para o CPF: {}", cpfCliente);
             throw new InvalidPedidoException(ConstantUtils.CLIENTE_NAO_ENCONTRADO);
