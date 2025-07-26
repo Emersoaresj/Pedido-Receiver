@@ -6,10 +6,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableFeignClients
-public class PedidoServiceApplication {
+public class PedidoReceiverApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(PedidoServiceApplication.class, args);
+		SpringApplication.run(PedidoReceiverApplication.class, args);
 	}
 
 }
