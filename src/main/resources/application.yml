@@ -33,7 +33,7 @@ server:
 
 produto:
   service:
-    url: ${PRODUTO_SERVICE_URL:http://localhost:8082}
+    url: ${PRODUTO_SERVICE_URL:http://produto_service:8082}
 cliente:
   service:
-    url: ${CLIENTE_SERVICE_URL:http://localhost:8081}
+    url: ${CLIENTE_SERVICE_URL:http://cliente_service:8081}
