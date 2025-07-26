@@ -72,21 +72,6 @@ public class PedidoServiceImpl implements PedidoServicePort {
         return response;
     }
 
-
-    @Override
-    public ResponseDto atualizaStatusPedido(Integer id, PedidoStatus novoStatus) {
-        try {
-            Pedido pedidoExistente = repositoryPort.buscarPedidoPorId(id);
-            pedidoExistente.setStatusPedido(novoStatus);
-
-            return repositoryPort.atualizarPedido(pedidoExistente);
-        } catch (Exception e) {
-            log.error("Erro ao atualizar status do pedido: {}", e.getMessage());
-            throw new ErroInternoException("Erro ao atualizar status do pedido: " + e.getMessage());
-        }
-
-    }
-
     @Override
     public List<PedidoByClienteDto> buscarPedidoByCpfCliente(String cpfCliente) {
         try {

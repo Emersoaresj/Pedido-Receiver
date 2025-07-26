@@ -52,26 +52,6 @@ public class PedidoRepositoryImpl implements PedidoRepositoryPort {
         }
     }
 
-    @Override
-    public Pedido buscarPedidoPorId(Integer idPedido) {
-        PedidoEntity pedidoEntity = pedidoRepositoryJPA.findById(idPedido)
-                .orElseThrow(() -> new ErroInternoException("Pedido não encontrado com ID: " + idPedido));
-        return PedidoMapper.INSTANCE.entityToDomain(pedidoEntity);
-    }
-
-    @Transactional
-    @Override
-    public ResponseDto atualizarPedido(Pedido pedido) {
-        try {
-            PedidoEntity entity = PedidoMapper.INSTANCE.domainToEntityUpdate(pedido);
-            PedidoEntity updated = pedidoRepositoryJPA.save(entity);
-            return montaResponse(updated, "atualizar");
-
-        } catch (Exception e) {
-            log.error("Erro ao atualizar pedido", e);
-            throw new ErroInternoException("Erro ao atualizar pedido: " + e.getMessage());
-        }
-    }
 
     @Override
     public List<Pedido> buscarPedidoPorIdCliente(Integer idCliente) {

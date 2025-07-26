@@ -8,8 +8,6 @@ public interface PedidoServicePort {
 
     ResponseDto cadastrarPedido(PedidoRequest request);
 
-    ResponseDto atualizaStatusPedido(Integer id, PedidoStatus novoStatus);
-
     List<PedidoByClienteDto> buscarPedidoByCpfCliente(String cpfCliente);
 
     List<PedidoDto> listarTodos();

@@ -9,10 +9,6 @@ public interface PedidoRepositoryPort {
 
     ResponseDto cadastrarPedido(Pedido pedido);
 
-    Pedido buscarPedidoPorId(Integer idPedido);
-
-    ResponseDto atualizarPedido(Pedido pedido);
-
     List<Pedido> buscarPedidoPorIdCliente(Integer idCliente);
 
     List<Pedido> listarTodos();

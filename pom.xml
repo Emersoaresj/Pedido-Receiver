@@ -145,9 +145,9 @@
 				<version>0.8.10</version>
 				<configuration>
 					<excludes>
-						<exclude>com/fiap/postech/pedido_service/domain/exceptions/**/*</exclude>
-						<exclude>com/fiap/postech/pedido_service/api/mapper/**/*</exclude>
-						<exclude>com/fiap/postech/pedido_service/utils/**/*</exclude>
+						<exclude>com/fiap/postech/pedido_receiver/domain/exceptions/**/*</exclude>
+						<exclude>com/fiap/postech/pedido_receiver/api/mapper/**/*</exclude>
+						<exclude>com/fiap/postech/pedido_receiver/utils/**/*</exclude>
 					</excludes>
 				</configuration>
 				<executions>
