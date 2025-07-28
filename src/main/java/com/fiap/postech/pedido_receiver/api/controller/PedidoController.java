@@ -193,18 +193,6 @@ public class PedidoController {
     @Operation(summary = "Deletar pedido por ID")
     @ApiResponses(value ={
             @ApiResponse(responseCode = "204", description = "Pedido deletado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados inválidos", content = @Content(
-                    mediaType = "application/json",
-                    examples = @ExampleObject(value = """
-                                {
-                                    "timestamp": "2024-07-24T10:00:00",
-                                    "status": 400,
-                                    "errors": {
-                                        "skuProduto": "SKU obrigatório",
-                                        "quantidade": "Quantidade obrigatória"
-                                    }
-                                }
-                            """))),
             @ApiResponse(responseCode = "404", description = "Pedido não encontrado", content = @Content(
                     mediaType = "application/json",
                     schema = @Schema(implementation = ResponseDto.class),
