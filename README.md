@@ -1,6 +1,6 @@
 # Pedido Receiver
 
-Serviço Java baseado em Spring Boot para recebimento e processamento de pedidos, utilizando PostgreSQL, Kafka, FeignClient para comunicação entre APIs, Flyway para migrações e arquitetura hexagonal (Ports & Adapters).
+Serviço Java baseado em Spring Boot para recebimento e processamento de pedidos, utilizando PostgreSQL, Kafka para mensageria, FeignClient para comunicação entre APIs, Flyway para migrações e arquitetura hexagonal (Ports & Adapters).
 
 ---
 
